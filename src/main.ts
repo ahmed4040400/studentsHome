@@ -5,7 +5,7 @@ import HotelListing from "./pages/HotelListing.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import ManagerDashboard from "./pages/admin/ManagerDashboard.vue";
 import Reservations from "./pages/admin/Reservations.vue";
-import GuestRegister from "./pages/guestRegister.vue";
+import GuestRegister from "./pages/GuestRegister.vue";
 import GuestLogin from "./pages/GuestLogin.vue";
 import AdminRegister from "./pages/admin/ManagerRegister.vue";
 import AdminLogin from "./pages/admin/managerLogin.vue";
