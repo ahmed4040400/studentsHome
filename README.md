@@ -88,7 +88,7 @@ The frontend application will start on `http://localhost:5173`
   - View their own reservations
 
 ### Admin/Manager Access
-- Admin Dashboard URL: `http://localhost:5173/admin/managerLogin`
+- Admin Dashboard URL: `http://localhost:5173/manager`
 - Default admin credentials:
   1. First Admin:
      - Email: admin@example.com
