@@ -15,17 +15,21 @@
 
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
             <div class="bg-[#23708A] py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                <form class="space-y-4 md:space-y-6" action="#">
+                <div v-if="error" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {{ error }}
+                </div>
+                <form @submit.prevent="handleLogin" class="space-y-4 md:space-y-6">
                     <div>
                         <label for="email" class="block mb-2 text-sm font-medium text-white">البريد الإلكتروني</label>
-                        <input type="email" name="email" id="email"
+                        <input v-model="email" type="email" name="email" id="email"
                             class="bg-gray-50 border border-gray-600 text-gray-900 rounded-lg focus:ring-blue-300 focus:border-blue-300 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            placeholder="user@example.com">
+                            placeholder="user@example.com" required>
                     </div>
                     <div>
                         <label for="password" class="block mb-2 text-sm font-medium text-white">كلمة المرور</label>
-                        <input type="password" name="password" id="password" placeholder="••••••••"
-                            class="bg-gray-50 border border-gray-600 text-gray-900 rounded-lg focus:ring-blue-300 focus:border-blue-300 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        <input v-model="password" type="password" name="password" id="password" placeholder="••••••••"
+                            class="bg-gray-50 border border-gray-600 text-gray-900 rounded-lg focus:ring-blue-300 focus:border-blue-300 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            required>
                     </div>
                     <div class="flex items-center justify-between">
                         <div class="flex items-start">
@@ -41,10 +45,10 @@
                             كلمة المرور؟</a>
                     </div>
                     <div>
-                        <RouterLink to="/hotels"
+                        <button type="submit"
                             class="w-full text-white bg-[#A04C59] hover:bg-[#798D97] focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                            تسجيل
-                            الدخول</RouterLink>
+                            تسجيل الدخول
+                        </button>
                     </div>
                     <p class="text-sm font-light text-gray-500 dark:text-gray-400">
                         ليس لديك حساب؟ <RouterLink to="/register"
@@ -56,3 +60,35 @@
         </div>
     </div>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { login } from '../services/api';
+import { RouterLink } from 'vue-router';
+
+const email = ref('');
+const password = ref('');
+const error = ref('');
+const router = useRouter();
+
+const handleLogin = async () => {
+    try {
+        error.value = '';
+        const response = await login(email.value, password.value);
+        
+        const user = response.data.user;
+        if (user.role !== 'guest') {
+            error.value = 'Access denied. Guest access only.';
+            return;
+        }
+
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(user));
+        router.push('/hotels');
+    } catch (err: any) {
+        console.error('Login error:', err);
+        error.value = err.response?.data?.message || 'Failed to login. Please try again.';
+    }
+};
+</script>

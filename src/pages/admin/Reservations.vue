@@ -35,30 +35,26 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(reservation, index) in reservations" :key="index"
+                <tr v-for="reservation in reservations" :key="reservation.id"
                     class="border-t border-t-gray-200 hover:bg-gray-100 transition-colors">
-                    <td
-                        class="h-[72px] px-4 py-2 w-[400px] text-gray-700 text-sm font-normal leading-normal text-right">
-                        <button @click="deleteReservation(index)"
+                    <td class="h-[72px] px-4 py-2 w-[400px] text-gray-700 text-sm font-normal leading-normal text-right">
+                        <button @click="handleDeleteReservation(reservation.id)"
                             class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">حذف</button>
                     </td>
                     <td class="h-[72px] px-4 py-2 w-24 text-gray-700 text-sm font-normal leading-normal text-right">
-                        {{ reservation.name }}
+                        {{ reservation.user_name }}
                     </td>
-                    <td
-                        class="h-[72px] px-4 py-2 w-[400px] text-gray-900 text-sm font-normal leading-normal text-right">
-                        {{ reservation.apartment }}
+                    <td class="h-[72px] px-4 py-2 w-[400px] text-gray-900 text-sm font-normal leading-normal text-right">
+                        {{ reservation.apartment_name }}
                     </td>
-                    <td
-                        class="h-[72px] px-4 py-2 w-[400px] text-gray-900 text-sm font-normal leading-normal text-right">
-                        {{ reservation.checkIn }}
+                    <td class="h-[72px] px-4 py-2 w-[400px] text-gray-900 text-sm font-normal leading-normal text-right">
+                        {{ new Date(reservation.check_in).toLocaleDateString('ar-EG') }}
                     </td>
                     <td class="h-[72px] px-4 py-2 w-60 text-gray-700 text-sm font-normal leading-normal text-right">
-                        {{ reservation.checkOut }}
+                        {{ new Date(reservation.check_out).toLocaleDateString('ar-EG') }}
                     </td>
-                    <td
-                        class="h-[72px] px-4 py-2 w-[400px] text-gray-700 text-sm font-normal leading-normal text-right">
-                        {{ reservation.price }}
+                    <td class="h-[72px] px-4 py-2 w-[400px] text-gray-700 text-sm font-normal leading-normal text-right">
+                        {{ reservation.total_price }} جنيه
                     </td>
                 </tr>
             </tbody>
@@ -67,48 +63,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
+import { getReservations, deleteReservation } from '../../services/api';
 
-const reservations = ref([
-    {
-        name: 'أحمد علي',
-        apartment: 'شقة جامعة القاهرة',
-        checkIn: '2023-10-01',
-        checkOut: '2023-10-05',
-        price: '8000 جنيه'
-    },
-    {
-        name: 'سارة محمد',
-        apartment: 'شقة جامعة عين شمس',
-        checkIn: '2023-10-10',
-        checkOut: '2023-10-15',
-        price: '15000 جنيه'
-    },
-    {
-        name: 'محمد حسن',
-        apartment: 'شقة جامعة الإسكندرية',
-        checkIn: '2023-11-01',
-        checkOut: '2023-11-05',
-        price: '9000 جنيه'
-    },
-    {
-        name: 'ليلى أحمد',
-        apartment: 'شقة جامعة المنصورة',
-        checkIn: '2023-12-01',
-        checkOut: '2023-12-05',
-        price: '12000 جنيه'
-    },
-    {
-        name: 'عمر عبد الله',
-        apartment: 'شقة جامعة أسيوط',
-        checkIn: '2023-12-10',
-        checkOut: '2023-12-15',
-        price: '20000 جنيه'
+const reservations = ref([]);
+
+const fetchReservations = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        const response = await getReservations(token);
+        reservations.value = response.data;
+    } catch (error) {
+        console.error('Failed to fetch reservations:', error);
     }
-]);
-
-const deleteReservation = (index: number) => {
-    reservations.value.splice(index, 1);
 };
+
+const handleDeleteReservation = async (id: number) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        await deleteReservation(id, token);
+        await fetchReservations();
+    } catch (error) {
+        console.error('Failed to delete reservation:', error);
+        alert('Failed to delete reservation. Please try again.');
+    }
+};
+
+onMounted(fetchReservations);
 </script>

@@ -15,28 +15,22 @@
 
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
             <div class="bg-[#23708A] py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                <form method="POST" action="#">
+                <div v-if="error" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {{ error }}
+                </div>
+                <form @submit.prevent="handleRegister">
                     <div>
                         <label for="name" class="block text-sm font-medium leading-5 text-white">الاسم</label>
                         <div class="mt-1 relative rounded-md shadow-sm">
-                            <input id="name" name="name" placeholder="جون دو" type="text"
+                            <input v-model="formData.name" id="name" name="name" placeholder="جون دو" type="text" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-600 rounded-md placeholder-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
-                            <div class="hidden absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                        clip-rule="evenodd">
-                                    </path>
-                                </svg>
-                            </div>
                         </div>
                     </div>
 
                     <div class="mt-6">
-                        <label for="username" class="block text-sm font-medium leading-5 text-white">اسم
-                            المستخدم</label>
+                        <label for="username" class="block text-sm font-medium leading-5 text-white">اسم المستخدم</label>
                         <div class="mt-1 flex rounded-md shadow-sm">
-                            <input id="username" name="username" placeholder="john" type="text"
+                            <input v-model="formData.username" id="username" name="username" placeholder="john" type="text" required
                                 class="flex-1 border border-gray-600 form-input pl-3 block w-full rounded-none rounded-r-md transition duration-150 ease-in-out sm:text-sm sm:leading-5">
                         </div>
                     </div>
@@ -46,15 +40,8 @@
                             البريد الإلكتروني
                         </label>
                         <div class="mt-1 relative rounded-md shadow-sm">
-                            <input id="email" name="email" placeholder="user@example.com" type="email"
+                            <input v-model="formData.email" id="email" name="email" placeholder="user@example.com" type="email" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-600 rounded-md placeholder-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
-                            <div class="hidden absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
                         </div>
                     </div>
 
@@ -63,7 +50,7 @@
                             كلمة المرور
                         </label>
                         <div class="mt-1 rounded-md shadow-sm">
-                            <input id="password" name="password" type="password"
+                            <input v-model="formData.password" id="password" name="password" type="password" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-600 rounded-md placeholder-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
                         </div>
                     </div>
@@ -73,22 +60,62 @@
                             تأكيد كلمة المرور
                         </label>
                         <div class="mt-1 rounded-md shadow-sm">
-                            <input id="password_confirmation" name="password_confirmation" type="password"
+                            <input v-model="formData.passwordConfirmation" id="password_confirmation" name="password_confirmation" type="password" required
                                 class="appearance-none block w-full px-3 py-2 border border-gray-600 rounded-md placeholder-gray-500 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5">
                         </div>
                     </div>
 
                     <div class="mt-6">
-                        <span class="block w-full rounded-md shadow-sm">
-                            <RouterLink to="/managerDashboard"
-                                class="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#A04C59] hover:bg-[#798D97] focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
-                                إنشاء حساب
-                            </RouterLink>
-                        </span>
+                        <button type="submit"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#A04C59] hover:bg-[#798D97] focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
+                            إنشاء حساب
+                        </button>
                     </div>
                 </form>
-
             </div>
         </div>
     </div>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { register } from '../../services/api';
+import { RouterLink } from 'vue-router';
+
+const router = useRouter();
+const error = ref('');
+const formData = ref({
+    name: '',
+    username: '',
+    email: '',
+    password: '',
+    passwordConfirmation: ''
+});
+
+const handleRegister = async () => {
+    try {
+        error.value = '';
+
+        if (formData.value.password !== formData.value.passwordConfirmation) {
+            error.value = 'كلمات المرور غير متطابقة';
+            return;
+        }
+
+        const response = await register({
+            name: formData.value.name,
+            username: formData.value.username,
+            email: formData.value.email,
+            password: formData.value.password,
+            role: 'manager'
+        });
+
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        router.push('/managerDashboard');
+    } catch (err: any) {
+        console.error('Registration error:', err);
+        error.value = err.response?.data?.message || 'Failed to register. Please try again.';
+    }
+};
+</script>

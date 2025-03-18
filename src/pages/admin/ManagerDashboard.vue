@@ -36,11 +36,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(hotel, index) in hotels" :key="index"
+                <tr v-for="hotel in hotels" :key="hotel.id"
                     class="border-t border-t-gray-200 hover:bg-gray-100 transition-colors">
                     <td
                         class="h-[72px] px-4 py-2 w-[400px] text-gray-700 text-sm font-normal leading-normal text-right">
-                        <button @click="deleteHotel(index)"
+                        <button @click="deleteHotel(hotel.id)"
                             class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">حذف</button>
                     </td>
                     <td
@@ -49,22 +49,22 @@
                     </td>
                     <td
                         class="h-[72px] px-4 py-2 w-[400px] text-gray-900 text-sm font-normal leading-normal text-right">
-                        {{ hotel.title }}
+                        {{ hotel.description }}
                     </td>
                     <td
-                        class="h-[72px] px-4 py-2 w-[400px] text-gray-700 text-sm font-normal leading-normal text-right">
+                        class="h-[72px] px-4 py-2 w-60 text-gray-700 text-sm font-normal leading-normal text-right">
                         {{ hotel.rating }}
                     </td>
                     <td
                         class="h-[72px] px-4 py-2 w-[400px] text-gray-700 text-sm font-normal leading-normal text-right">
-                        {{ hotel.location }}
+                        {{ hotel.distance }}
                     </td>
                     <td
                         class="h-[72px] px-4 py-2 w-[400px] text-gray-700 text-sm font-normal leading-normal text-right">
                         {{ hotel.price }}
                     </td>
                     <td class="h-[72px] px-4 py-2 w-14 text-sm font-normal leading-normal text-right">
-                        <img :src="hotel.image" alt="Apartment Image" class="w-14 h-14 object-cover rounded">
+                        <img :src="hotel.image_url" alt="Apartment Image" class="w-14 h-14 object-cover rounded">
                     </td>
                 </tr>
             </tbody>
@@ -82,37 +82,37 @@
                 <form @submit.prevent="addHotel">
                     <div class="mb-4">
                         <label class="block mb-2 text-white">رابط الصورة</label>
-                        <input v-model="newHotel.image" type="text"
+                        <input v-model="newHotel.image_url" type="text" required
                             class="w-full p-2 border rounded bg-gray-700 text-white">
                     </div>
                     <div class="mb-4">
                         <label class="block mb-2 text-white">الاسم</label>
-                        <input v-model="newHotel.name" type="text"
+                        <input v-model="newHotel.name" type="text" required
                             class="w-full p-2 border rounded bg-gray-700 text-white">
                     </div>
                     <div class="mb-4">
-                        <label class="block mb-2 text-white">العنوان</label>
-                        <input v-model="newHotel.title" type="text"
+                        <label class="block mb-2 text-white">الوصف</label>
+                        <input v-model="newHotel.description" type="text" required
                             class="w-full p-2 border rounded bg-gray-700 text-white">
                     </div>
                     <div class="mb-4">
                         <label class="block mb-2 text-white">التقييم</label>
-                        <input v-model="newHotel.rating" type="number" step="0.1"
+                        <input v-model="newHotel.rating" type="number" step="0.1" required
                             class="w-full p-2 border rounded bg-gray-700 text-white">
                     </div>
                     <div class="mb-4">
                         <label class="block mb-2 text-white">المراجعات</label>
-                        <input v-model="newHotel.reviews" type="number"
+                        <input v-model="newHotel.reviews" type="number" required
                             class="w-full p-2 border rounded bg-gray-700 text-white">
                     </div>
                     <div class="mb-4">
-                        <label class="block mb-2 text-white">الموقع</label>
-                        <input v-model="newHotel.location" type="text"
+                        <label class="block mb-2 text-white">المسافة</label>
+                        <input v-model="newHotel.distance" type="text" required
                             class="w-full p-2 border rounded bg-gray-700 text-white">
                     </div>
                     <div class="mb-4">
                         <label class="block mb-2 text-white">السعر</label>
-                        <input v-model="newHotel.price" type="text"
+                        <input v-model="newHotel.price" type="text" required
                             class="w-full p-2 border rounded bg-gray-700 text-white">
                     </div>
                     <div class="flex justify-end">
@@ -127,84 +127,78 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
+import { getApartments, createApartment, deleteApartment } from '../../services/api';
 
-const hotels = ref([
-    {
-        image: 'https://www.propertyfinder.eg/blog/wp-content/uploads/2021/10/shutterstock_1545550622-1-800x534.jpg',
-        name: 'شقة جامعة القاهرة',
-        title: 'تقع بالقرب من جامعة القاهرة، هذه الشقة توفر إقامة مريحة للطلاب.',
-        rating: 4.6,
-        reviews: 20,
-        location: '0.5 كم',
-        price: '2000 جنيه/ليلة'
-    },
-    {
-        image: 'https://cdn103.adwimg.com/res/650/300/241112/classifieds/XO67jM3dh30qiL9BywauhdaWPpI3Rtum.jpg',
-        name: 'شقة جامعة عين شمس',
-        title: 'تقع بالقرب من جامعة عين شمس، هذه الشقة مثالية للطلاب والموظفين.',
-        rating: 4.8,
-        reviews: 18,
-        location: '1 كم',
-        price: '3000 جنيه/ليلة'
-    },
-    {
-        image: 'https://img-3.aqarmap.com.eg/new-aqarmap-media/search-thumb-webp/2411/672bc689a1347431371840.jpg',
-        name: 'شقة جامعة الإسكندرية',
-        title: 'تقع بالقرب من جامعة الإسكندرية، هذه الشقة توفر إقامة مريحة للطلاب.',
-        rating: 4.7,
-        reviews: 25,
-        location: '2 كم',
-        price: '2500 جنيه/ليلة'
-    },
-    {
-        image: 'https://img-0.aqarmap.com.eg/new-aqarmap-media/search-thumb-webp/2409/66e2b42336aa3974414416.jpeg',
-        name: 'شقة جامعة المنصورة',
-        title: 'تقع بالقرب من جامعة المنصورة، هذه الشقة توفر إقامة مريحة للطلاب.',
-        rating: 4.5,
-        reviews: 22,
-        location: '3 كم',
-        price: '1800 جنيه/ليلة'
-    },
-    {
-        image: 'https://www.propertyfinder.eg/blog/wp-content/uploads/2018/08/140829012602pm_324450241587663-1.jpg',
-        name: 'شقة جامعة أسيوط',
-        title: 'تقع بالقرب من جامعة أسيوط، هذه الشقة توفر إقامة مريحة للطلاب.',
-        rating: 4.9,
-        reviews: 19,
-        location: '4 كم',
-        price: '2200 جنيه/ليلة'
-    }
-]);
-
+const hotels = ref([]);
 const showModal = ref(false);
 const newHotel = ref({
-    image: '',
+    image_url: '',
     name: '',
-    title: '',
+    description: '',
     rating: 0,
-    reviews: 0, // Added missing property
-    location: '',
+    reviews: 0,
+    distance: '',
     price: ''
 });
 
-const addHotel = () => {
-    hotels.value.push({ ...newHotel.value });
-    newHotel.value = {
-        image: '',
-        name: '',
-        title: '',
-        rating: 0,
-        reviews: 0, // Added missing property
-        location: '',
-        price: ''
-    };
-    showModal.value = false;
+const addHotel = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        await createApartment({
+            name: newHotel.value.name,
+            description: newHotel.value.description,
+            image_url: newHotel.value.image_url,
+            distance: newHotel.value.distance,
+            rating: newHotel.value.rating,
+            reviews: newHotel.value.reviews,
+            price: newHotel.value.price
+        }, token);
+
+        // Refresh the list
+        fetchHotels();
+        
+        // Reset form
+        newHotel.value = {
+            image_url: '',
+            name: '',
+            description: '',
+            rating: 0,
+            reviews: 0,
+            distance: '',
+            price: ''
+        };
+        showModal.value = false;
+    } catch (error) {
+        console.error('Failed to add apartment:', error);
+        alert('Failed to add apartment. Please try again.');
+    }
 };
 
-const deleteHotel = (index: number) => {
-    hotels.value.splice(index, 1);
+const deleteHotel = async (id: number) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        await deleteApartment(id, token);
+        fetchHotels();
+    } catch (error) {
+        console.error('Failed to delete apartment:', error);
+        alert('Failed to delete apartment. Please try again.');
+    }
 };
 
+const fetchHotels = async () => {
+    try {
+        const response = await getApartments();
+        hotels.value = response.data;
+    } catch (error) {
+        console.error('Failed to fetch apartments:', error);
+    }
+};
+
+onMounted(fetchHotels);
 </script>
